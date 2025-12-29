@@ -13,7 +13,6 @@ const pool = new Pool({
 
 async function createTable() {
   try {
-    // Users Table
     await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -23,8 +22,6 @@ async function createTable() {
                 role TEXT DEFAULT 'user'
             );
         `);
-
-    // Tickets Table
     await pool.query(`
             CREATE TABLE IF NOT EXISTS tickets (
                 id SERIAL PRIMARY KEY,
@@ -42,10 +39,9 @@ async function createTable() {
 }
 createTable();
 
+// AUTH ROUTES
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
-  if (!name || !email || !password)
-    return res.status(400).send("Fill all fields");
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
@@ -66,7 +62,7 @@ app.post("/login", async (req, res) => {
     ]);
     const user = result.rows[0];
     if (user && (await bcrypt.compare(password, user.password))) {
-      res.json({ name: user.name, email: user.email }); // Send back user data
+      res.json({ name: user.name, email: user.email });
     } else {
       res.status(400).send("Invalid credentials");
     }
@@ -75,7 +71,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// NEW: Submit Ticket Route
+// TICKET ROUTES
 app.post("/tickets", async (req, res) => {
   const { email, title, description } = req.body;
   try {
@@ -83,9 +79,22 @@ app.post("/tickets", async (req, res) => {
       "INSERT INTO tickets (user_email, title, description) VALUES ($1, $2, $3)",
       [email, title, description]
     );
-    res.status(201).send("Ticket submitted successfully!");
+    res.status(201).send("Ticket submitted!");
   } catch (err) {
     res.status(500).send("Error saving ticket.");
+  }
+});
+
+app.get("/tickets/:email", async (req, res) => {
+  const { email } = req.params;
+  try {
+    const result = await pool.query(
+      "SELECT * FROM tickets WHERE user_email = $1 ORDER BY created_at DESC",
+      [email]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).send("Error fetching tickets.");
   }
 });
 

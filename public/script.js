@@ -1,5 +1,5 @@
 const messageP = document.getElementById("message");
-let currentUserEmail = ""; // To remember who is logged in
+let currentUserEmail = "";
 
 async function register() {
   const name = document.getElementById("reg-name").value;
@@ -30,7 +30,7 @@ async function login() {
     document.getElementById("auth-section").style.display = "none";
     document.getElementById("ticket-section").style.display = "block";
     document.getElementById("welcome-msg").innerText = `Welcome, ${user.name}`;
-    messageP.innerText = "";
+    loadTickets(); // Load dashboard immediately
   } else {
     messageP.innerText = await response.text();
   }
@@ -40,11 +40,6 @@ async function submitTicket() {
   const title = document.getElementById("ticket-title").value;
   const description = document.getElementById("ticket-desc").value;
 
-  if (!title || !description) {
-    alert("Please fill in the ticket details.");
-    return;
-  }
-
   const response = await fetch("/tickets", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -52,10 +47,33 @@ async function submitTicket() {
   });
 
   if (response.ok) {
-    alert("Ticket submitted!");
     document.getElementById("ticket-title").value = "";
     document.getElementById("ticket-desc").value = "";
-  } else {
-    alert("Error submitting ticket.");
+    loadTickets(); // Refresh list after submitting
   }
+}
+
+async function loadTickets() {
+  const container = document.getElementById("tickets-container");
+  const response = await fetch(`/tickets/${currentUserEmail}`);
+  const tickets = await response.json();
+
+  if (tickets.length === 0) {
+    container.innerHTML = "<p>No tickets found.</p>";
+    return;
+  }
+
+  container.innerHTML = tickets
+    .map(
+      (t) => `
+        <div style="border: 1px solid #ccc; padding: 10px; margin-top: 10px; border-radius: 5px; background: #f9f9f9;">
+            <strong>${t.title}</strong> - <span style="color: blue;">${
+        t.status
+      }</span>
+            <p>${t.description}</p>
+            <small>${new Date(t.created_at).toLocaleString()}</small>
+        </div>
+    `
+    )
+    .join("");
 }
