@@ -6,91 +6,88 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-// 1. DATABASE CONNECTION
-// Render provides the DATABASE_URL via Environment Variables
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false, // Required for secure cloud connection to Render/Heroku
-  },
+  ssl: { rejectUnauthorized: false },
 });
 
-// 2. AUTO-TABLE CREATION
-// This runs every time the server starts to ensure the database is ready
 async function createTable() {
   try {
+    // Users Table
     await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
-                role TEXT DEFAULT 'user',
+                role TEXT DEFAULT 'user'
+            );
+        `);
+
+    // Tickets Table
+    await pool.query(`
+            CREATE TABLE IF NOT EXISTS tickets (
+                id SERIAL PRIMARY KEY,
+                user_email TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                status TEXT DEFAULT 'Open',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-    console.log("✅ Database table verified/created successfully.");
+    console.log("✅ Database tables verified.");
   } catch (err) {
     console.error("❌ Database table error:", err);
   }
 }
 createTable();
 
-// 3. REGISTER ROUTE
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
-
-  // Basic Validation
-  if (!name || !email || !password) {
-    return res.status(400).send("Please fill in all fields.");
-  }
-
+  if (!name || !email || !password)
+    return res.status(400).send("Fill all fields");
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Insert user into PostgreSQL
     await pool.query(
       "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)",
       [name, email, hashedPassword]
     );
-
-    res.status(201).send("Registration successful! You can now log in.");
+    res.status(201).send("Registered successfully!");
   } catch (err) {
-    if (err.code === "23505") {
-      // Unique violation error code in Postgres
-      res.status(400).send("Email already exists.");
-    } else {
-      console.error(err);
-      res.status(500).send("Server error during registration.");
-    }
+    res.status(400).send("Email already exists.");
   }
 });
 
-// 4. LOGIN ROUTE
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   try {
-    // Find user by email
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
     const user = result.rows[0];
-
     if (user && (await bcrypt.compare(password, user.password))) {
-      res.send(`Welcome back, ${user.name}!`);
+      res.json({ name: user.name, email: user.email }); // Send back user data
     } else {
-      res.status(400).send("Invalid email or password.");
+      res.status(400).send("Invalid credentials");
     }
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error during login.");
+    res.status(500).send("Server error");
   }
 });
 
-// 5. SERVER START
-// Use Render's dynamic port or default to 3000 locally
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+// NEW: Submit Ticket Route
+app.post("/tickets", async (req, res) => {
+  const { email, title, description } = req.body;
+  try {
+    await pool.query(
+      "INSERT INTO tickets (user_email, title, description) VALUES ($1, $2, $3)",
+      [email, title, description]
+    );
+    res.status(201).send("Ticket submitted successfully!");
+  } catch (err) {
+    res.status(500).send("Error saving ticket.");
+  }
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));

@@ -2,33 +2,49 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>IT Support System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IT Support Portal</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="container">
       <h1>IT Support Portal</h1>
 
-      <div id="register-box">
-        <h2>Create Account</h2>
-        <input type="text" id="reg-name" placeholder="Full Name" />
-        <input type="email" id="reg-email" placeholder="Email" />
-        <input type="password" id="reg-pass" placeholder="Password" />
-        <button onclick="register()">Register</button>
+      <div id="auth-section">
+        <div class="form-box">
+          <h3>Login</h3>
+          <input type="email" id="login-email" placeholder="Email" />
+          <input type="password" id="login-pass" placeholder="Password" />
+          <button onclick="login()">Login</button>
+        </div>
+        <div class="form-box">
+          <h3>Register</h3>
+          <input type="text" id="reg-name" placeholder="Full Name" />
+          <input type="email" id="reg-email" placeholder="Email" />
+          <input type="password" id="reg-pass" placeholder="Password" />
+          <button onclick="register()">Register</button>
+        </div>
       </div>
 
-      <hr />
-
-      <div id="login-box">
-        <h2>Login</h2>
-        <input type="email" id="login-email" placeholder="Email" />
-        <input type="password" id="login-pass" placeholder="Password" />
-        <button onclick="login()">Login</button>
+      <div id="ticket-section" style="display: none">
+        <h2 id="welcome-msg"></h2>
+        <div class="form-box">
+          <h3>Submit a Support Ticket</h3>
+          <input
+            type="text"
+            id="ticket-title"
+            placeholder="Issue Title (e.g. WiFi not working)"
+          />
+          <textarea
+            id="ticket-desc"
+            placeholder="Describe your problem in detail..."
+          ></textarea>
+          <button onclick="submitTicket()">Submit Ticket</button>
+        </div>
       </div>
 
       <p id="message"></p>
     </div>
-
     <script src="script.js"></script>
   </body>
 </html>
