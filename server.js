@@ -1,76 +1,96 @@
-// 1. IMPORT TOOLS
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const { Pool } = require("pg");
 const app = express();
 
-// 2. MIDDLEWARE (The "Pre-processors")
-// This allows the server to read JSON data sent from the frontend
 app.use(express.json());
-// This tells the server to show the files in the "public" folder (HTML, CSS, JS)
 app.use(express.static("public"));
 
-// 3. MOCK DATABASE
-// For now, users are stored in this list.
-// Note: If you restart the server, this list clears! We'll fix this in Phase 8.
-let users = [];
+// 1. DATABASE CONNECTION
+// Render provides the DATABASE_URL via Environment Variables
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // Required for secure cloud connection to Render/Heroku
+  },
+});
 
-// 4. REGISTER ROUTE (Create a new account)
-app.post("/register", async (req, res) => {
+// 2. AUTO-TABLE CREATION
+// This runs every time the server starts to ensure the database is ready
+async function createTable() {
   try {
-    const { name, email, password } = req.body;
+    await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT DEFAULT 'user',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+    console.log("✅ Database table verified/created successfully.");
+  } catch (err) {
+    console.error("❌ Database table error:", err);
+  }
+}
+createTable();
 
-    // VALIDATION: Make sure no fields are empty
-    if (!name || !email || !password) {
-      return res.status(400).send("Please fill in all fields.");
-    }
+// 3. REGISTER ROUTE
+app.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
 
-    // SCRAMBLE PASSWORD: Turn "password123" into a safe hash
+  // Basic Validation
+  if (!name || !email || !password) {
+    return res.status(400).send("Please fill in all fields.");
+  }
+
+  try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // SAVE USER: Add them to our temporary list
-    const newUser = {
-      id: Date.now(),
-      name: name,
-      email: email,
-      password: hashedPassword,
-    };
-    users.push(newUser);
+    // Insert user into PostgreSQL
+    await pool.query(
+      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)",
+      [name, email, hashedPassword]
+    );
 
-    res.status(201).send("User registered successfully!");
-    console.log("New user registered. Current count:", users.length);
-  } catch (error) {
-    res.status(500).send("Server error during registration.");
+    res.status(201).send("Registration successful! You can now log in.");
+  } catch (err) {
+    if (err.code === "23505") {
+      // Unique violation error code in Postgres
+      res.status(400).send("Email already exists.");
+    } else {
+      console.error(err);
+      res.status(500).send("Server error during registration.");
+    }
   }
 });
 
-// 5. LOGIN ROUTE (Check credentials)
+// 4. LOGIN ROUTE
 app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
+    // Find user by email
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+    const user = result.rows[0];
 
-    // FIND USER: Look for the email in our list
-    const user = users.find((u) => u.email === email);
-
-    if (user) {
-      // COMPARE: Check if the typed password matches the scrambled one
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (isMatch) {
-        res.send(`Welcome back, ${user.name}!`);
-      } else {
-        res.status(400).send("Invalid password.");
-      }
+    if (user && (await bcrypt.compare(password, user.password))) {
+      res.send(`Welcome back, ${user.name}!`);
     } else {
-      // No user found with that email
-      res.status(400).send("User not found.");
+      res.status(400).send("Invalid email or password.");
     }
-  } catch (error) {
+  } catch (err) {
+    console.error(err);
     res.status(500).send("Server error during login.");
   }
 });
 
-// 6. START THE SERVER
-const PORT = 3000;
+// 5. SERVER START
+// Use Render's dynamic port or default to 3000 locally
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running at http://localhost:${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
