@@ -98,5 +98,17 @@ app.get("/tickets/:email", async (req, res) => {
   }
 });
 
+// NEW: Delete Ticket Route
+app.delete("/tickets/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query("DELETE FROM tickets WHERE id = $1", [id]);
+    res.send("Ticket deleted successfully!");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting ticket.");
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));

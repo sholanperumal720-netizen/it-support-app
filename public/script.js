@@ -30,7 +30,7 @@ async function login() {
     document.getElementById("auth-section").style.display = "none";
     document.getElementById("ticket-section").style.display = "block";
     document.getElementById("welcome-msg").innerText = `Welcome, ${user.name}`;
-    loadTickets(); // Load dashboard immediately
+    loadTickets();
   } else {
     messageP.innerText = await response.text();
   }
@@ -49,7 +49,22 @@ async function submitTicket() {
   if (response.ok) {
     document.getElementById("ticket-title").value = "";
     document.getElementById("ticket-desc").value = "";
-    loadTickets(); // Refresh list after submitting
+    loadTickets();
+  }
+}
+
+// NEW: Function to delete a ticket
+async function deleteTicket(id) {
+  if (!confirm("Are you sure you want to delete this ticket?")) return;
+
+  const response = await fetch(`/tickets/${id}`, {
+    method: "DELETE",
+  });
+
+  if (response.ok) {
+    loadTickets(); // Refresh list immediately
+  } else {
+    alert("Failed to delete ticket.");
   }
 }
 
@@ -63,10 +78,14 @@ async function loadTickets() {
     return;
   }
 
+  // Updated to include the Delete Button
   container.innerHTML = tickets
     .map(
       (t) => `
-        <div style="border: 1px solid #ccc; padding: 10px; margin-top: 10px; border-radius: 5px; background: #f9f9f9;">
+        <div style="border: 1px solid #ccc; padding: 15px; margin-top: 10px; border-radius: 5px; background: #f9f9f9; position: relative;">
+            <button onclick="deleteTicket(${
+              t.id
+            })" style="position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 5px 10px; font-size: 12px;">Delete</button>
             <strong>${t.title}</strong> - <span style="color: blue;">${
         t.status
       }</span>
