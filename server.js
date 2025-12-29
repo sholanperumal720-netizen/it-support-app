@@ -39,7 +39,7 @@ async function createTable() {
 }
 createTable();
 
-// AUTH ROUTES
+// --- AUTH ROUTES ---
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
   try {
@@ -71,7 +71,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// TICKET ROUTES
+// --- USER TICKET ROUTES ---
 app.post("/tickets", async (req, res) => {
   const { email, title, description } = req.body;
   try {
@@ -94,19 +94,43 @@ app.get("/tickets/:email", async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    res.status(500).send("Error fetching tickets.");
+    res.status(500).send("Error fetching user tickets.");
   }
 });
 
-// NEW: Delete Ticket Route
 app.delete("/tickets/:id", async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query("DELETE FROM tickets WHERE id = $1", [id]);
-    res.send("Ticket deleted successfully!");
+    res.send("Ticket deleted.");
   } catch (err) {
-    console.error(err);
     res.status(500).send("Error deleting ticket.");
+  }
+});
+
+// --- ADMIN ROUTES ---
+app.get("/admin/tickets", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM tickets ORDER BY created_at DESC"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).send("Error fetching all tickets.");
+  }
+});
+
+app.put("/tickets/:id", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    await pool.query("UPDATE tickets SET status = $1 WHERE id = $2", [
+      status,
+      id,
+    ]);
+    res.send("Status updated!");
+  } catch (err) {
+    res.status(500).send("Error updating status.");
   }
 });
 

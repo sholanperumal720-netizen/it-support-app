@@ -26,6 +26,19 @@
         </div>
       </div>
 
+      <button
+        id="logout-btn"
+        onclick="logout()"
+        style="
+          display: none;
+          background: #666;
+          color: white;
+          margin-bottom: 20px;
+        "
+      >
+        Logout
+      </button>
+
       <div id="ticket-section" style="display: none">
         <h2 id="welcome-msg"></h2>
         <div class="form-box">
@@ -37,12 +50,17 @@
           ></textarea>
           <button onclick="submitTicket()">Submit Ticket</button>
         </div>
-
         <div class="form-box">
           <h3>My Tickets</h3>
-          <div id="tickets-container">
-            <p>No tickets yet.</p>
-          </div>
+          <div id="tickets-container"></div>
+        </div>
+      </div>
+
+      <div id="admin-section" style="display: none">
+        <h2 style="color: red">Admin Dashboard</h2>
+        <div class="form-box">
+          <h3>All Global Tickets</h3>
+          <div id="admin-tickets-container"></div>
         </div>
       </div>
 
