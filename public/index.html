@@ -6,88 +6,147 @@
     <title>IT Support Portal</title>
     <link rel="stylesheet" href="style.css" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
-    <div class="container">
-      <h1>IT Support Portal</h1>
-
-      <div id="auth-section">
-        <div id="login-box" class="form-box">
-          <h3>Login</h3>
-          <input type="email" id="login-email" placeholder="Email" />
-          <input type="password" id="login-pass" placeholder="Password" />
-          <button onclick="login()">Login</button>
-          <p style="text-align: center">
-            <a href="#" onclick="toggleForgot(true)">Forgot Password?</a>
-          </p>
-        </div>
-
-        <div id="forgot-box" class="form-box" style="display: none">
-          <h3>Reset Password</h3>
-          <p style="font-size: 0.9rem; color: #666">
-            Enter your email to receive a reset link.
-          </p>
-          <input type="email" id="forgot-email" placeholder="Account Email" />
-          <button onclick="requestReset()">Send Link</button>
-          <button
-            onclick="toggleForgot(false)"
-            style="background: #6b7280; margin-top: 10px"
-          >
-            Back
-          </button>
-        </div>
-
-        <div id="reg-box" class="form-box">
-          <h3>Register</h3>
-          <input type="text" id="reg-name" placeholder="Full Name" />
-          <input type="email" id="reg-email" placeholder="Email" />
-          <input type="password" id="reg-pass" placeholder="Password" />
-          <button onclick="register()">Register</button>
-        </div>
-      </div>
-
+    <nav class="navbar">
+      <div class="brand">IT Support Portal</div>
       <button
         id="logout-btn"
+        class="nav-btn"
         onclick="logout()"
-        style="
-          display: none;
-          background: #6b7280;
-          color: white;
-          margin-bottom: 20px;
-        "
+        style="display: none"
       >
         Logout
       </button>
+    </nav>
+
+    <div id="message"></div>
+
+    <div class="container">
+      <div id="auth-section">
+        <div id="login-card" class="auth-wrapper">
+          <div class="auth-header">
+            <h2>Welcome Back</h2>
+            <p>Please log in to your account</p>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              id="login-email"
+              placeholder="name@example.com"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-pass" placeholder="••••••••" />
+          </div>
+          <button class="primary-btn" onclick="login()">Sign In</button>
+
+          <p style="margin-top: 20px; font-size: 0.9rem">
+            Don't have an account?
+            <span class="toggle-link" onclick="showRegister()">Create one</span>
+          </p>
+          <p style="font-size: 0.85rem; margin-top: 10px">
+            <span class="toggle-link" onclick="toggleForgot(true)"
+              >Forgot Password?</span
+            >
+          </p>
+        </div>
+
+        <div id="register-card" class="auth-wrapper" style="display: none">
+          <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Join the portal to submit tickets</p>
+          </div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="reg-name" placeholder="John Doe" />
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="reg-email" placeholder="name@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="reg-pass"
+              placeholder="Create a strong password"
+            />
+          </div>
+          <button class="primary-btn" onclick="register()">Sign Up</button>
+
+          <p style="margin-top: 20px; font-size: 0.9rem">
+            Already have an account?
+            <span class="toggle-link" onclick="showLogin()">Log in</span>
+          </p>
+        </div>
+
+        <div id="forgot-card" class="auth-wrapper" style="display: none">
+          <div class="auth-header">
+            <h2>Reset Password</h2>
+            <p>Enter your email to receive a reset link</p>
+          </div>
+          <div class="form-group">
+            <input
+              type="email"
+              id="forgot-email"
+              placeholder="name@example.com"
+            />
+          </div>
+          <button class="primary-btn" onclick="requestReset()">
+            Send Link
+          </button>
+          <p style="margin-top: 20px">
+            <span class="toggle-link" onclick="toggleForgot(false)"
+              >Back to Login</span
+            >
+          </p>
+        </div>
+      </div>
 
       <div id="ticket-section" style="display: none">
-        <h2 id="welcome-msg"></h2>
-        <div class="form-box">
-          <h3>Submit a Support Ticket</h3>
-          <input type="text" id="ticket-title" placeholder="Issue Title" />
-          <textarea
-            id="ticket-desc"
-            placeholder="Describe your problem..."
-          ></textarea>
-          <button onclick="submitTicket()">Submit Ticket</button>
+        <div class="section-header">
+          <h2 id="welcome-msg">Hello, User</h2>
         </div>
-        <div class="form-box">
-          <h3>My Tickets</h3>
-          <div id="tickets-container"></div>
+
+        <div class="ticket-card" style="border-left: 4px solid var(--primary)">
+          <h3>New Ticket</h3>
+          <div class="form-group">
+            <input
+              type="text"
+              id="ticket-title"
+              placeholder="Brief summary of issue"
+            />
+          </div>
+          <div class="form-group">
+            <textarea
+              id="ticket-desc"
+              rows="3"
+              placeholder="Describe the details..."
+            ></textarea>
+          </div>
+          <button class="primary-btn" onclick="submitTicket()">
+            Submit Request
+          </button>
         </div>
+
+        <h3 style="margin-top: 30px; color: var(--text-muted)">
+          Recent History
+        </h3>
+        <div id="tickets-container"></div>
       </div>
 
       <div id="admin-section" style="display: none">
-        <h2 style="color: #ef4444">Admin Dashboard</h2>
-        <div class="form-box">
-          <h3>System-Wide Tickets</h3>
-          <div id="admin-tickets-container"></div>
+        <div class="section-header">
+          <h2 style="color: var(--danger)">Admin Panel</h2>
         </div>
+        <div id="admin-tickets-container"></div>
       </div>
-
-      <p id="message"></p>
     </div>
     <script src="script.js"></script>
   </body>
