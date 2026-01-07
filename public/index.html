@@ -5,19 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IT Support Portal</title>
     <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="container">
       <h1>IT Support Portal</h1>
 
       <div id="auth-section">
-        <div class="form-box">
+        <div id="login-box" class="form-box">
           <h3>Login</h3>
           <input type="email" id="login-email" placeholder="Email" />
           <input type="password" id="login-pass" placeholder="Password" />
           <button onclick="login()">Login</button>
+          <p style="text-align: center">
+            <a href="#" onclick="toggleForgot(true)">Forgot Password?</a>
+          </p>
         </div>
-        <div class="form-box">
+
+        <div id="forgot-box" class="form-box" style="display: none">
+          <h3>Reset Password</h3>
+          <p style="font-size: 0.9rem; color: #666">
+            Enter your email to receive a reset link.
+          </p>
+          <input type="email" id="forgot-email" placeholder="Account Email" />
+          <button onclick="requestReset()">Send Link</button>
+          <button
+            onclick="toggleForgot(false)"
+            style="background: #6b7280; margin-top: 10px"
+          >
+            Back
+          </button>
+        </div>
+
+        <div id="reg-box" class="form-box">
           <h3>Register</h3>
           <input type="text" id="reg-name" placeholder="Full Name" />
           <input type="email" id="reg-email" placeholder="Email" />
@@ -31,7 +54,7 @@
         onclick="logout()"
         style="
           display: none;
-          background: #666;
+          background: #6b7280;
           color: white;
           margin-bottom: 20px;
         "
@@ -57,9 +80,9 @@
       </div>
 
       <div id="admin-section" style="display: none">
-        <h2 style="color: red">Admin Dashboard</h2>
+        <h2 style="color: #ef4444">Admin Dashboard</h2>
         <div class="form-box">
-          <h3>All Global Tickets</h3>
+          <h3>System-Wide Tickets</h3>
           <div id="admin-tickets-container"></div>
         </div>
       </div>

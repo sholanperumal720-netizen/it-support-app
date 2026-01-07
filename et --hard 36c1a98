@@ -1,0 +1,12 @@
+[33m81c1ed9[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Added delete and admin status features
+[33m3908e0a[m Fix invisible ticket section and login logic
+[33mb4ce1bc[m Complete fix for login and forgot password
+[33m7a58ad1[m Fix validation issues and add password reset feature
+[33m7b12e21[m Fix validation and add forgot password logic
+[33m03cec4e[m Phase 13: Added modern UI and styling
+[33m36c1a98[m Phase 12: Added Admin Dashboard and Logout feature
+[33m0bb6777[m Phase 11: Added ticket deletion functionality
+[33mb62c25c[m Phase 10: Implemented User Ticket Dashboard
+[33mc827b8f[m Phase 9: Added ticket submission system
+[33mf296bfa[m Complete server.js with PostgreSQL integration
+[33ma91d9f3[m Initial commit: Login and Register working
